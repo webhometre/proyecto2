@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Admin 2 | Terminal Control</title>
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --danger: #ff4757;
+            --success: #2ed573;
+            --dark-bg: #0d0d0d;
+            --panel-bg: #161616;
+            --terminal-bg: #050505;
+        }
+
+        body { 
+            background: var(--dark-bg); 
+            color: #fff; 
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Consola de Estado Superior */
+        .terminal-console {
+            background: var(--terminal-bg);
+            border-bottom: 2px solid #222;
+            height: 35vh;
+            padding: 15px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-size: 0.85em;
+            color: #33ff33; /* Estilo terminal clásico verde */
+            line-height: 1.4;
+        }
+
+        .terminal-console::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terminal-console::-webkit-scrollbar-thumb {
+            background: #222;
+            border-radius: 4px;
+        }
+
+        .log-entry { margin: 2px 0; }
+        .log-time { color: #888; margin-right: 8px; }
+        .log-error { color: var(--danger); font-weight: bold; }
+        .log-success { color: var(--success); font-weight: bold; }
+        .log-info { color: var(--primary); }
+
+        /* Contenedor del Login */
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #1a1a1a 0%, #0d0d0d 100%);
+        }
+
+        .container { 
+            background: var(--panel-bg); 
+            padding: 40px; 
+            border-radius: 12px; 
+            width: 100%;
+            max-width: 340px; 
+            text-align: center; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            border: 1px solid #252525;
+            position: relative;
+        }
+
+        h2 { 
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 14px 12px; 
+            border-radius: 6px; 
+            border: 1px solid #333; 
+            background: #1f1f1f; 
+            color: #fff; 
+            box-sizing: border-box; 
+            font-size: 1em;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: var(--primary); 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1em;
+            font-family: inherit;
+            color: #000;
+            text-transform: uppercase;
+            transition: 0.2s;
+            letter-spacing: 1px;
+        }
+
+        button:hover { 
+            background: #00b8de; 
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        button:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Banner de estado interno */
+        .msg-box {
+            margin-top: 15px;
+            font-size: 0.85em;
+            border-radius: 6px;
+            padding: 10px;
+            display: none;
+            text-align: left;
+        }
+        .msg-box.error { background: rgba(255, 71, 87, 0.15); color: var(--danger); border: 1px solid var(--danger); display: block; }
+        .msg-box.success { background: rgba(46, 213, 115, 0.15); color: var(--success); border: 1px solid var(--success); display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-console" id="terminal">
+        <div class="log-entry"><span class="log-time">[SYSTEM 2 INITIALIZED]</span> Terminal de Monitoreo activa (us-supremecourt). Listo para autenticación.</div>
+    </div>
+
+    <div class="login-wrapper">
+        <div class="container">
+            <h2>🔒 SECURE AUTH 2</h2>
+            
+            <div class="input-group">
+                <input type="email" id="email" placeholder="root_email@domain.com" autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="pass" placeholder="••••••••••••">
+            </div>
+            
+            <button id="btnLogin">Execute Login</button>
+            
+            <div id="msgBox" class="msg-box"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <script>
+        // Configuración unificada para tu segundo proyecto (us-supremecourt)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC43TebWDW4tOoiqm7a8DeQNIRg5dWE_Kc",
+            authDomain: "us-supremecourt.firebaseapp.com",
+            projectId: "us-supremecourt",
+            storageBucket: "us-supremecourt.firebasestorage.app",
+            messagingSenderId: "822836110236",
+            appId: "1:822836110236:web:a07dadd46c6f4184fd5e59"
+        };
+
+        // Inicializar App
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Función para imprimir logs en la terminal superior
+        function appendLog(text, type = 'info') {
+            const term = document.getElementById('terminal');
+            const timeStr = new Date().toLocaleTimeString();
+            let cssClass = 'log-info';
+            
+            if (type === 'error') cssClass = 'log-error';
+            if (type === 'success') cssClass = 'log-success';
+
+            term.innerHTML += `<div class="log-entry"><span class="log-time">[${timeStr}]</span> <span class="${cssClass}">${text}</span></div>`;
+            term.scrollTop = term.scrollHeight; // Auto-scroll
+        }
+
+        // Función para mostrar errores debajo del botón
+        function showMessage(text, isError = true) {
+            const msgBox = document.getElementById('msgBox');
+            msgBox.textContent = text;
+            msgBox.className = isError ? "msg-box error" : "msg-box success";
+        }
+
+        // Manejador del login nativo
+        document.getElementById('btnLogin').onclick = () => {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value;
+            const btn = document.getElementById('btnLogin');
+            const msgBox = document.getElementById('msgBox');
+
+            msgBox.style.display = 'none';
+
+            if (!email || !pass) {
+                appendLog("FALTA DE DATOS: Intento de inicio fallido debido a campos vacíos.", "error");
+                showMessage("Por favor, rellene todos los campos requeridos.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Authenticating...";
+            appendLog(`Iniciando handshake de autenticación en Servidor 2 para: ${email}...`, 'info');
+
+            // Autenticación nativa contra us-supremecourt
+            auth.signInWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    appendLog("ACCESO CONCEDIDO: Token de Servidor 2 estructurado correctamente.", "success");
+                    showMessage("Acceso verificado. Abriendo panel de control...", false);
+                    
+                    setTimeout(() => {
+                        // Te envía de forma directa a tu generador en la raíz
+                        window.location.href = 'menu2.html';
+                    }, 1000);
+                })
+                .catch(error => {
+                    btn.disabled = false;
+                    btn.textContent = "Execute Login";
+                    
+                    let friendlyMessage = "Error de conexión con el servidor.";
+                    appendLog(`AUTENTICACIÓN FALLIDA - Código interno de Firebase: ${error.code}`, "error");
+
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            friendlyMessage = "El formato de correo ingresado no es válido.";
+                            break;
+                        case 'auth/user-disabled':
+                            friendlyMessage = "Este administrador se encuentra suspendido.";
+                            break;
+                        case 'auth/user-not-found':
+                            friendlyMessage = "El usuario/correo ingresado no se encuentra registrado en este servidor.";
+                            break;
+                        case 'auth/wrong-password':
+                        case 'auth/invalid-credential': 
+                            friendlyMessage = "La contraseña o credencial proporcionada es incorrecta.";
+                            break;
+                        case 'auth/too-many-requests':
+                            friendlyMessage = "Demasiados intentos erróneos. Acceso bloqueado temporalmente.";
+                            break;
+                        default:
+                            friendlyMessage = error.message;
+                            break;
+                    }
+
+                    showMessage(friendlyMessage, true);
+                });
+        };
+
+        // Capturar la tecla Enter
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('btnLogin').click();
+            }
+        });
+    </script>
+</body>
+</html>

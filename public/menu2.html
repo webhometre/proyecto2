@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator | TechCore</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; margin: 0; box-sizing: border-box; }
+        
+        /* Barra de Estado Superior */
+        .top-bar { background: #333; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-radius: 8px; width: 100%; max-width: 450px; box-sizing: border-box; }
+        #user-display { color: #00d4ff; font-weight: bold; font-size: 0.9em; }
+        .btn-logout { background: #e53935; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; width: auto; font-weight: bold; }
+
+        .container { background: #2a2a2a; padding: 40px; border-radius: 15px; width: 100%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; box-sizing: border-box; margin-bottom: 20px; } 
+        h2 { text-align: center; color: #00d4ff; margin-top: 0; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; background: #333; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #00d4ff; color: #000; font-size: 1.1em; margin-top: 10px; transition: all 0.3s ease; }
+        #resultArea { margin-top: 20px; text-align: center; display: none; }
+
+        /* Contenedor del Listado para Borrar Basura */
+        .management-panel { background: #222; border: 1px solid #333; border-radius: 15px; padding: 20px; width: 100%; max-width: 450px; box-sizing: border-box; display: none; }
+        .panel-title { color: #ff9800; text-align: center; margin-top: 0; font-size: 1.3em; display: flex; justify-content: space-between; align-items: center; }
+        .warrants-list { max-height: 300px; overflow-y: auto; margin-top: 15px; padding-right: 5px; }
+        
+        /* Fila de cada link */
+        .warrant-item { display: flex; align-items: center; background: #2e2e2e; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #ff9800; }
+        .warrant-checkbox { width: auto; margin-right: 15px; transform: scale(1.3); cursor: pointer; }
+        .warrant-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .warrant-name { font-weight: bold; color: #fff; font-size: 0.95em; }
+        .warrant-meta { font-size: 0.78em; color: #aaa; }
+        
+        .btn-delete-selected { background: #e53935; color: white; font-size: 1em; margin-top: 15px; }
+        .btn-delete-selected:hover { background: #b71c1c; }
+        .btn-delete-selected:disabled { background: #444; color: #777; cursor: not-allowed; }
+        
+        /* Ajuste de scrollbar */
+        .warrants-list::-webkit-scrollbar { width: 6px; }
+        .warrants-list::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <span id="user-display">Cargando administrador...</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+</div>
+
+<div class="container" id="mainContainer">
+    <h2>📝 Generate Warrant</h2>
+    <input type="text" id="nombre" placeholder="Full Name">
+    <input type="text" id="monto" placeholder="Amount (e.g. $500)">
+    <input type="date" id="fecha">
+    <button id="btnGenerarWarrant">Generate Secure Link</button>
+
+    <div id="resultArea">
+        <input type="text" id="finalLink" readonly style="color:black; width: 100%; padding: 10px; margin-top: 10px;">
+        <button onclick="copiarLink()" style="background:#28a745; color: white;">Copy Link</button>
+    </div>
+</div>
+
+<div class="management-panel" id="managementPanel">
+    <div class="panel-title">
+        <span>🗑️ Active Warrants</span>
+    </div>
+    
+    <div class="warrants-list" id="warrantsList">
+        <div style="text-align: center; color: #777; padding: 20px;">Sincronizando registros...</div>
+    </div>
+    
+    <button class="btn-delete-selected" id="btnBorrarSeleccionados" disabled>Delete Selected Links</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC43TebWDW4tOoiqm7a8DeQNIRg5dWE_Kc",
+        authDomain: "us-supremecourt.firebaseapp.com",
+        projectId: "us-supremecourt",
+        storageBucket: "us-supremecourt.firebasestorage.app",
+        messagingSenderId: "822836110236",
+        appId: "1:822836110236:web:a07dadd46c6f4184fd5e59"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const LOGIN_URL = "login2.html";
+
+    // --- GUARDIA DE SEGURIDAD EN TIEMPO REAL ---
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = LOGIN_URL;
+        } else {
+            document.getElementById('user-display').innerText = `Admin: ${user.email}`;
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('managementPanel').style.display = 'block';
+            iniciarTemporizadorInactividad();
+            escucharWarrants(); // Inicia la lectura activa en tiempo real
+        }
+    });
+
+    function logout() {
+        auth.signOut().then(() => {
+            window.location.href = LOGIN_URL;
+        });
+    }
+
+    // --- CONTROL DE INACTIVIDAD (15 MINUTOS MÁXIMO) ---
+    function iniciarTemporizadorInactividad() {
+        const TIEMPO_LIMITE = 15 * 60 * 1000; 
+        let temporizador;
+
+        const cerrarSesionForzado = () => {
+            auth.signOut().then(() => {
+                window.location.href = LOGIN_URL;
+            });
+        };
+
+        const resetearTemporizador = () => {
+            clearTimeout(temporizador);
+            temporizador = setTimeout(cerrarSesionForzado, TIEMPO_LIMITE);
+        };
+
+        window.addEventListener('load', resetearTemporizador);
+        document.addEventListener('mousemove', resetearTemporizador);
+        document.addEventListener('keypress', resetearTemporizador);
+        document.addEventListener('touchstart', resetearTemporizador); 
+        
+        resetearTemporizador();
+    }
+
+    // --- LÓGICA DE TU GENERADOR DE WARRANTS ---
+    const btnGenerar = document.getElementById('btnGenerarWarrant');
+
+    btnGenerar.onclick = function() {
+        const nombre = document.getElementById('nombre').value;
+        const monto = document.getElementById('monto').value;
+        const fecha = document.getElementById('fecha').value;
+        
+        if(!nombre || !fecha || !monto) { alert("Complete all fields"); return; }
+        
+        btnGenerar.disabled = true;
+        btnGenerar.innerText = "Generating Secure Link...";
+        btnGenerar.style.background = "#555";
+        btnGenerar.style.color = "#aaa";
+
+        const token = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const expiresAt = new Date();
+        expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+
+        db.collection("warrants").doc(token).set({
+            nombre: nombre,
+            monto: monto,
+            fecha: fecha,
+            expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp() // Sello de tiempo agregado para orden dinámico
+        }).then(() => {
+            const url = window.location.origin + "/visor_warrant.html?token=" + token;
+            document.getElementById('finalLink').value = url;
+            document.getElementById('resultArea').style.display = 'block';
+
+            btnGenerar.innerText = "Link Generated!";
+            btnGenerar.style.background = "#28a745";
+            btnGenerar.style.color = "#fff";
+
+            setTimeout(() => {
+                btnGenerar.disabled = false;
+                btnGenerar.innerText = "Generate Another Link";
+                btnGenerar.style.background = "#00d4ff";
+                btnGenerar.style.color = "#000";
+            }, 1200);
+
+        }).catch((error) => {
+            alert("Error: " + error.message);
+            btnGenerar.disabled = false;
+            btnGenerar.innerText = "Generate Secure Link";
+            btnGenerar.style.background = "#00d4ff";
+            btnGenerar.style.color = "#000";
+        });
+    };
+
+    // --- ESCUCHADOR EN TIEMPO REAL PARA ELIMINACIÓN ---
+    let registrosSeleccionados = [];
+
+    function escucharWarrants() {
+        // Trae los registros ordenados del más nuevo al más viejo
+        db.collection("warrants").orderBy("creadoEn", "desc")
+        .onSnapshot((snapshot) => {
+            const listContainer = document.getElementById('warrantsList');
+            listContainer.innerHTML = "";
+            registrosSeleccionados = [];
+            document.getElementById('btnBorrarSeleccionados').disabled = true;
+
+            if (snapshot.empty) {
+                listContainer.innerHTML = `<div style="text-align: center; color: #555; padding: 20px;">No links found in database.</div>`;
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                
+                // Formatear la hora de creación de manera legible
+                let horaLegible = "Just now";
+                if (data.creadoEn && data.creadoEn.toDate) {
+                    const dateObj = data.creadoEn.toDate();
+                    horaLegible = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " | " + dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                }
+
+                const item = document.createElement('div');
+                item.className = 'warrant-item';
+                item.innerHTML = `
+                    <input type="checkbox" class="warrant-checkbox" value="${doc.id}" onchange="toggleSeleccion(this)">
+                    <div class="warrant-info">
+                        <span class="warrant-name">${data.nombre || 'No Name'} (${data.monto || '$0'})</span>
+                        <span class="warrant-meta">ID: ${doc.id} • 🕒 ${horaLegible}</span>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }, (error) => {
+            // Nota: Si arroja error de índice en la consola de Termux por falta de campo histórico, Firestore creará el link directo al darle clic.
+            console.log("Firestore sync active: ", error.message);
+        });
+    }
+
+    // Monitorear casillas marcadas
+    window.toggleSeleccion = function(checkbox) {
+        const id = checkbox.value;
+        if (checkbox.checked) {
+            registrosSeleccionados.push(id);
+        } else {
+            registrosSeleccionados = registrosSeleccionados.filter(item => item !== id);
+        }
+        
+        // Habilitar botón si hay al menos uno marcado
+        document.getElementById('btnBorrarSeleccionados').disabled = registrosSeleccionados.length === 0;
+    };
+
+    // Botón ejecutor de eliminación masiva
+    document.getElementById('btnBorrarSeleccionados').onclick = function() {
+        if (registrosSeleccionados.length === 0) return;
+        
+        if (confirm(`Are you sure you want to completely destroy ${registrosSeleccionados.length} selected link(s)?`)) {
+            const btnBorrar = document.getElementById('btnBorrarSeleccionados');
+            btnBorrar.disabled = true;
+            btnBorrar.innerText = "Purging Database...";
+
+            // Lazo asíncrono para remover cada documento marcado en lote
+            const promesas = registrosSeleccionados.map(id => db.collection("warrants").doc(id).delete());
+
+            Promise.all(promesas)
+                .then(() => {
+                    alert("Selected links purged successfully!");
+                    btnBorrar.innerText = "Delete Selected Links";
+                })
+                .catch((error) => {
+                    alert("Error during purge: " + error.message);
+                    btnBorrar.disabled = false;
+                    btnBorrar.innerText = "Delete Selected Links";
+                });
+        }
+    };
+
+    function copiarLink() {
+        const copyText = document.getElementById("finalLink");
+        copyText.select();
+        document.execCommand("copy");
+        alert("Link copied!");
+    }
+</script>
+</body>
+</html>
