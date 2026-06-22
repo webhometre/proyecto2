@@ -6,7 +6,7 @@
     <title>Generator | TechCore</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #fff; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .container { background: #2a2a2a; padding: 40px; border-radius: 15px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .container { background: #2a2a2a; padding: 40px; border-radius: 15px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; } /* Oculto por defecto hasta validar sesión */
         h2 { text-align: center; color: #00d4ff; }
         input { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; background: #333; color: white; box-sizing: border-box; }
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #00d4ff; color: #000; font-size: 1.1em; margin-top: 10px; }
@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="mainContainer">
     <h2>📝 Generate Warrant</h2>
     <input type="text" id="nombre" placeholder="Full Name">
     <input type="text" id="monto" placeholder="Amount (e.g. $500)">
@@ -30,7 +30,10 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
 <script>
+    // Tu configuración actual de Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyC43TebWDW4tOoiqm7a8DeQNIRg5dWE_Kc",
         authDomain: "us-supremecourt.firebaseapp.com",
@@ -42,7 +45,47 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
+    // URL de tu login en Proyecto 1 para redireccionar intrusos
+    const LOGIN_URL = "../Webhometreasury/public/login.html";
+
+    // --- GUARDIA DE SEGURIDAD EN TIEMPO REAL ---
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            // Si no hay sesión iniciada, redirige al login inmediatamente
+            window.location.href = LOGIN_URL;
+        } else {
+            // Si el usuario es válido, muestra el contenedor del generador
+            document.getElementById('mainContainer').style.display = 'block';
+            iniciarTemporizadorInactividad();
+        }
+    });
+
+    // --- CONTROL DE INACTIVIDAD (15 MINUTOS) ---
+    function iniciarTemporizadorInactividad() {
+        const TIEMPO_LIMITE = 15 * 60 * 1000; // 15 minutos en milisegundos
+        let temporizador;
+
+        const cerrarSesionForzado = () => {
+            auth.signOut().then(() => {
+                window.location.href = LOGIN_URL;
+            });
+        };
+
+        const resetearTemporizador = () => {
+            clearTimeout(temporizador);
+            temporizador = setTimeout(cerrarSesionForzado, TIEMPO_LIMITE);
+        };
+
+        // Escucha interacciones en tu Samsung A14 para reiniciar el contador si estás activo
+        window.onload = resetearTemporizador;
+        document.onmousemove = resetearTemporizador;
+        document.onkeypress = resetearTemporizador;
+        document.ontouchstart = resetearTemporizador; 
+    }
+
+    // --- LÓGICA DE TU GENERADOR ---
     document.getElementById('btnGenerarWarrant').onclick = function() {
         const nombre = document.getElementById('nombre').value;
         const monto = document.getElementById('monto').value;
